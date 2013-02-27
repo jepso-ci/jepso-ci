@@ -1,6 +1,6 @@
 {
-  "name": "jepso-ci",
-  "version": "0.0.1",
+  "name": "mocha-ci",
+  "version": "0.0.2",
   "description": "jepso-ci",
   "main": "server.js",
   "dependencies": {
@@ -20,7 +20,8 @@
     "test-results-badge": "*",
     "better-assert": "~0.1.0",
     "jade": "~0.27.7",
-    "jepso-ci-config": "~1.0.0"
+    "jepso-ci-config": "~1.0.0",
+    "cloudflare": "0.0.2"
   },
   "scripts": {
     "test": "mocha",
@@ -32,7 +33,7 @@
   },
   "author": "",
   "license": "MIT",
-  "subdomain": "mocha-ci",
+  "subdomain": "jepso-ci",
   "domains": [
     "jepso-ci.com",
     "www.jepso-ci.com"
