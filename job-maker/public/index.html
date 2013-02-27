@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JEPSO CI</title>
+    <link href="/style.css" rel="stylesheet" />
+    <link href="/table.css" rel="stylesheet" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/pushed.js"></script>
+  </head>
+  <body>
+    <div id="color-bar" />
+    <div class="content">
+      <img src="/logo.svg" width="100px" height="100px" align="right"/>
+      <h1>Job Maker</h1>
+      <p>This is the status page for the worker that takes builds and converts them into jobs.</p>
+      <h2>Processed Builds</h2>
+      <p>This table will be populated with repositories being processed as they arrive in real time (and will be cleared if you refresh).</p>
+      <table class="table table-bordered table-hover table-condensed table-striped" style="width: 600px">
+        <thead>
+          <tr>
+            <th>User</th>
+            <th>Repo</th>
+            <th>Tag</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="stream">
+          <tr><td colspan="4">No builds processed yet...</td></tr>
+        </tbody>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/pushed.js"></script>
+    <script>
+    (function () {
+      var repos = [];
+      function newMessage(name) {
+        return function (data) {
+          repos.unshift({type: name, data: data});
+          if (repos.length > 20) {
+            repos.pop();
+          }
+          render();
+        }
+      }
+
+      var stream = document.getElementById('stream');
+      var placeholder = document.createElement('div');
+      function render() {
+        placeholder.innerHTML = '<table>' + repos.map(function (message) {
+          if (message.type === 'error reading queue') {
+            return '<tr class="error">' + 
+                     '<td colspan="2">Error reading queue</td>' + 
+                     '<td colspan="2">' + message.data + '</td>' +
+                   '</tr>';
+          } else if (message.type === 'polling for message') {
+            return '<tr class="info">' + 
+                     '<td colspan="4">polling for message</td>' +
+                   '</tr>';
+          } else {
+            return '<tr class="' + (message.type === 'error' ? 
+                                   'error' : 
+                                   (message.type === 'build queued' ? 
+                                    'success' : 
+                                    '')) + '">' + 
+                     '<td>' + message.data.user + '</td>' + 
+                     '<td>' + message.data.repo + '</td>' +
+                     '<td>' + message.data.tag + '</td>' +
+                     '<td>' + (message.data.err || message.type) + '</td>' +
+                   '</tr>';
+          }
+        }).join('') + '</table>';
+        var body = placeholder.firstChild.firstChild;
+        stream.parentNode.replaceChild(body, stream);
+        stream = body;
+      }
+      ['polling for message', 'getting config', 'creating build',
+       'setting build in progress', 'adding jobs', 'build queued',
+       'error', 'error reading queue']
+      .forEach(function (message) {
+        pushed.on(message, newMessage(message));
+      });
+    }());
+    </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-37734724-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

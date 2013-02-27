@@ -1,0 +1,14 @@
+body, html {
+  font-family: Helvetica;
+  padding: 0px;
+  margin: 0px;
+  height: 100%;
+}
+.content {
+  padding: 100px;
+}
+#color-bar {
+  background: #c00080;
+  height: 20px;
+  margin 0px;
+}

@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JEPSO CI</title>
+    <link href="/style.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="color-bar" />
+    <div class="content">
+      <img src="/logo.svg" width="100px" height="100px" align="right"/>
+      <h1>Jepso CI</h1>
+      <p>Jepso CI is a simple tool to perform cross unit testing.  It's free for open source libraries and tests on over 60 browser/os combinations.</p>
+      <p>It can provide you with a compatibility badge in a range of formats.  Such as this one (for native JSON support).</p>
+      <img src="/jepso-ci-examples/minimum.svg" />
+      <h2>Integrating your test framework</h2>
+      <p>It is simple to integrate any JavaScript testing framework.  All that's required is that you set the value <code>window.testsPassed</code> to either <code>true</code> or <code>false</code> to indicate the success or failure of your tests.</p>
+      <p>If you have lots of asynchronous tests, you should also set the value <code>window.completedTests = 0</code> and then increment it (<code>window.completedTests++;</code>) after each test, otherwise we'll assume the tests have hung and timeout.</p>
+      <h2>Enabling CI</h2>
+      <p>To enable CI your project must first be publicly hosted on <a href="https://github.com">GitHub</a>.  Next you must add a file in the root of the repository called <code>.jepso-ci.json</code> and it should look something like the following:</p>
+      <pre><code>{
+  "url": "/tests/test.html"
+}</code></pre>
+      <p>The url must begin with a <code>/</code> and be a relative path name to an html file</p>
+      <p>To have tests run each time you push changes you'll need to add a webhook in the admin for your github repository.  Pointing to <code>https://jepso-ci.com/api/hook</code></p>
+      <h2>Advanced Reporting</h2>
+      <p>In the future it will be possible to support complete reports for the test results.</p>
+    </div>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-37734724-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

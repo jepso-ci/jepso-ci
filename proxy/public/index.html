@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JEPSO CI</title>
+    <link href="/style.css" rel="stylesheet" />
+    <link href="/table.css" rel="stylesheet" />
+  </head>
+  <body>
+    <div id="color-bar" />
+    <div class="content">
+      <img src="/logo.svg" width="100px" height="100px" align="right"/>
+      <h1>Jepso CI Proxy</h1>
+      <p>Jepso creates a proxy to GitHub with a number of clever tansformations to let you test components even if they have dependencies that need to be built in some way (e.g. coffee-script or components)</p>
+      <h2>Requests</h2>
+      <p>This table will be populated with requests being made as they arrive in real time (and will be cleared if you refresh).</p>
+      <table class="table table-bordered table-hover table-condensed table-striped" style="width: 600px">
+        <thead>
+          <tr>
+            <th>Method</th>
+            <th>Path</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="stream">
+          <tr><td colspan="3">No requests made yet...</td></tr>
+        </tbody>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/pushed.js"></script>
+    <script>
+    (function () {
+      var requests = [];
+      function newRequest(repo) {
+        requests.unshift(repo);
+        if (requests.length > 20) {
+          requests.pop();
+        }
+        render();
+      }
+      var stream = document.getElementById('stream');
+      var placeholder = document.createElement('div');
+      function render() {
+        placeholder.innerHTML = '<table>' + requests.map(function (req) {
+          return '<tr class="' + (req.status == 200 ? 'success' : 'error') + '">' + 
+                   '<td>' + req.method + '</td>' + 
+                   '<td>' + req.path + '</td>' +
+                   '<td>' + req.status + '</td>' +
+                 '</tr>';
+        }).join('') + '</table>';
+        var body = placeholder.firstChild.firstChild;
+        stream.parentNode.replaceChild(body, stream);
+        stream = body;
+      }
+      pushed.on('request', newRequest);
+    }());
+    </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-37734724-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>

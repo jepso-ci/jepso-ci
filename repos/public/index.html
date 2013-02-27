@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>JEPSO CI</title>
+    <link href="/style.css" rel="stylesheet" />
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/pushed.js"></script>
+  </head>
+  <body>
+    <div id="color-bar" />
+    <div class="content">
+      <img src="/logo.svg" width="100px" height="100px" align="right"/>
+      <h1 data-content="repo-path">user/repo</h1>
+      <p>This page displays the current build status for <span data-content="repo-path"></span>.</p>
+      <div id="current" style="display: none;"><h2>Current Build</h2><div id="current-build-status"></div></div>
+      <div id="last" style="display: none;"><h2>Last Completed Build</h2><div id="latest-build-status"></div></div>
+      <div id="only" style="display: none;"><h2>Build Status</h2><div id="only-build-status"></div></div>
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/pushed.js"></script>
+    <script src="/test-results-badge.js"></script>
+    <script src="/ajax.js"></script>
+    <script>
+    (function () {
+      var user, repo;
+      (function (u, r) {
+        user = u;
+        repo = r;
+      }.apply(null, location.pathname.replace(/^\//, '').split('/')));
+      (function (elements) {
+        for (var i = 0; i < elements.length; i++) {
+          elements[i].textContent = user + '/' + repo;
+        };
+      }(document.querySelectorAll('[data-content="repo-path"]')));
+
+      var badge = testResultsBadge.jepsoBadge;
+
+      var currentBuildID = null, latestBuildID = null;
+
+      var latest = {}, current = {};
+
+      ajax.getJSON('/' + user + '/' + repo + '.json', function (spec) {
+        currentBuildID = spec.currentBuild;
+        latestBuildID = spec.latestBuild;
+        if (currentBuildID === latestBuildID) {
+          ajax.getJSON('/' + user + '/' + repo + '/' + latestBuildID + '.json', function (res) {
+            for (var key in res) {
+              if (typeof latest[key] === 'undefined') {
+                latest[key] = res[key];
+              }
+            }
+            updateRender();
+          });
+        } else {
+          var inProgress = 2;
+          if (latestBuildID === null) {
+            inProgress--;
+          } else {
+            ajax.getJSON('/' + user + '/' + repo + '/' + latestBuildID + '.json', function (res) {
+              for (var key in res) {
+                if (typeof latest[key] === 'undefined') {
+                  latest[key] = res[key];
+                }
+              }
+              if (0 === --inProgress) updateRender();
+            });
+          }
+          ajax.getJSON('/' + user + '/' + repo + '/' + currentBuildID + '.json', function (res) {
+            for (var key in res) {
+              if (typeof current[key] === 'undefined') {
+                current[key] = res[key];
+              }
+            }
+            if (0 === --inProgress) updateRender();
+          });
+        }
+      });
+      var initialRender = false;
+      function updateRender() {
+        initialRender = true;
+        if (currentBuildID === latestBuildID) {
+          document.getElementById('only').removeAttribute('style');
+          document.getElementById('last').setAttribute('style', 'display: none');
+          document.getElementById('current').setAttribute('style', 'display: none');
+          updateBadge('only-build-status', latest);
+        } else {
+          document.getElementById('only').setAttribute('style', 'display: none');
+          document.getElementById('last').removeAttribute('style');
+          document.getElementById('current').removeAttribute('style');
+          if (latestBuildID == null) {
+            document.getElementById('latest-build-status').textContent = 'No completed builds yet';
+          } else {
+            updateBadge('latest-build-status', latest);
+          }
+          updateBadge('current-build-status', current);
+        }
+      }
+      function updateBadge(id, obj) {
+        document.getElementById(id).innerHTML = badge(obj, 640, 240);
+      }
+
+      pushed.subscribe('/api/job-runner/' + user + '/' + repo);
+      pushed.on('update', function (data) {
+        if (data.buildID === currentBuildID) {
+          current[data.browser] = 'testing ' + data.testing;
+          if (initialRender) updateRender();
+        }
+      });
+      pushed.on('done', function (data) {
+        if (data.buildID === currentBuildID) {
+          current[data.browser] = data.state;
+          if (initialRender) updateRender()
+        }
+      });
+    }());
+    </script>
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-37734724-1']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+  </body>
+</html>
