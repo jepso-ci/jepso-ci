@@ -1,7 +1,7 @@
 {
-  "name": "mocha-ci",
-  "version": "0.0.0-79",
-  "description": "mocha-ci",
+  "name": "jepso-ci",
+  "version": "0.0.1",
+  "description": "jepso-ci",
   "main": "server.js",
   "dependencies": {
     "express": "~3",
@@ -28,15 +28,13 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/ForbesLindesay/mocha-ci.git"
+    "url": "https://github.com/jepso-ci/jepso-ci.git"
   },
   "author": "",
   "license": "MIT",
   "subdomain": "mocha-ci",
   "domains": [
-    "mocha-ci.com",
     "jepso-ci.com",
-    "www.mocha-ci.com",
     "www.jepso-ci.com"
   ],
   "engines": {
